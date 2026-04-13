@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AITuition — Pricing</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Nunito', sans-serif; }
+    [dir="rtl"] { direction: rtl; text-align: right; }
+    .card-hover { transition: transform 0.2s, box-shadow 0.2s; }
+    .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.10); }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+<!-- PRICING SECTION -->
+<div class="max-w-7xl mx-auto px-4 py-16">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row justify-between items-center mb-10 gap-4">
+    <!-- Logo -->
+    <div class="flex items-center gap-2">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-green-400 to-blue-500 flex items-center justify-center text-white font-black text-lg">A</div>
+      <span class="font-black text-xl text-gray-900">AITuition</span>
+    </div>
+
+    <!-- Language Selector -->
+    <select id="languageSelector"
+      class="bg-white border border-gray-300 rounded-2xl px-5 py-2.5 text-base font-semibold focus:outline-none focus:ring-2 focus:ring-green-500 shadow-sm cursor-pointer">
+      <option value="en">🇬🇧 English</option>
+      <option value="hi">🇮🇳 हिंदी</option>
+      <option value="or">🇮🇳 ଓଡ଼ିଆ</option>
+      <option value="bn">🇮🇳 বাংলা</option>
+      <option value="ta">🇮🇳 தமிழ்</option>
+      <option value="te">🇮🇳 తెలుగు</option>
+      <option value="mr">🇮🇳 मराठी</option>
+      <option value="kn">🇮🇳 ಕನ್ನಡ</option>
+      <option value="gu">🇮🇳 ગુજરાતી</option>
+      <option value="ml">🇮🇳 മലയാളം</option>
+      <option value="ur">🇵🇰 اردو</option>
+    </select>
+  </div>
+
+  <!-- Trial badge -->
+  <div class="text-center mb-6">
+    <span id="trialBadge" class="inline-flex items-center gap-2 bg-green-100 text-green-800 text-sm font-bold px-5 py-2 rounded-full shadow-sm"></span>
+  </div>
+
+  <h1 id="pricingTitle" class="text-4xl sm:text-5xl font-black text-center text-gray-900 mb-3"></h1>
+  <p id="pricingSubtitle" class="text-lg text-gray-500 text-center mb-4"></p>
+
+  <!-- Billing toggle -->
+  <div class="flex justify-center mb-12">
+    <div class="inline-flex bg-white border border-gray-200 rounded-2xl p-1 gap-1 shadow-sm">
+      <button id="btn-monthly"   onclick="setBilling('monthly')"   class="billing-btn px-5 py-2 rounded-xl text-sm font-bold transition-all"></button>
+      <button id="btn-quarterly" onclick="setBilling('quarterly')" class="billing-btn px-5 py-2 rounded-xl text-sm font-bold transition-all"></button>
+      <button id="btn-yearly"    onclick="setBilling('yearly')"    class="billing-btn px-5 py-2 rounded-xl text-sm font-bold transition-all"></button>
+    </div>
+  </div>
+
+  <!-- Cards Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="pricingCards"></div>
+
+  <!-- Footer note -->
+  <p id="footerNote" class="text-center text-xs text-gray-400 mt-8"></p>
+</div>
+
+<script>
+// ─── Full 11-language translations ───────────────────────────────────────────
+const translations = {
+  en: {
+    pricingTitle:   "Simple, Honest Pricing",
+    pricingSubtitle:"7-day free trial on all plans. Cancel anytime.",
+    trialBadge:     "🎉 7-Day Free Trial — No credit card required",
+    group1:         "LKG – UKG",
+    group2:         "Class 1 – 5",
+    group3:         "Class 6 – 8",
+    group4:         "Class 9 – 12",
+    basicPlan:      "Basic",
+    proPlan:        "Pro",
+    mostPopular:    "⭐ Most Popular",
+    monthly:        "/ month",
+    quarterly:      "Quarterly",
+    yearly:         "Yearly",
+    save:           "Save",
+    billingMonthly: "Monthly",
+    billingQuarterly:"Quarterly",
+    billingYearly:  "Yearly",
+    featuresBasic:  "Daily 30-min AI lecture + 5-question surprise quiz, progress tracking & streaks, 11-language support, parent dashboard",
+    featuresPro:    "Everything in Basic + Saturday & Sunday doubt-clearing sessions with instant AI explanations",
+    choosePlanBtn:  "Start Free Trial",
+    icseNote:       "ICSE: ₹{basic} Basic / ₹{pro} Pro",
+    footerNote:     "All prices include GST. 7-day free trial. Cancel anytime. Powered by AITuition.",
+    saveLabel:      "Save {pct}%",
+    perMonth:       "/mo",
+  },
+  hi: {
+    pricingTitle:   "सरल, ईमानदार मूल्य निर्धारण",
+    pricingSubtitle:"सभी प्लान पर 7 दिन का निःशुल्क ट्रायल। कभी भी रद्द करें।",
+    trialBadge:     "🎉 7 दिन निःशुल्क ट्रायल — क्रेडिट कार्ड की आवश्यकता नहीं",
+    group1:         "LKG – UKG",
+    group2:         "कक्षा 1 – 5",
+    group3:         "कक्षा 6 – 8",
+    group4:         "कक्षा 9 – 12",
+    basicPlan:      "बेसिक",
+    proPlan:        "प्रो",
+    mostPopular:    "⭐ सबसे लोकप्रिय",
+    monthly:        "/ माह",
+    quarterly:      "त्रैमासिक",
+    yearly:         "वार्षिक",
+    save:           "बचत",
+    billingMonthly: "मासिक",
+    billingQuarterly:"त्रैमासिक",
+    billingYearly:  "वार्षिक",
+    featuresBasic:  "दैनिक 30 मिनट AI व्याख्यान + 5 प्रश्न क्विज़, प्रगति ट्रैकिंग, 11 भाषाएं, माता-पिता डैशबोर्ड",
+    featuresPro:    "बेसिक में सब कुछ + शनि-रवि संदेह-समाधान सत्र",
+    choosePlanBtn:  "निःशुल्क ट्रायल शुरू करें",
+    icseNote:       "ICSE: ₹{basic} बेसिक / ₹{pro} प्रो",
+    footerNote:     "सभी मूल्यों में GST शामिल है। 7 दिन का निःशुल्क ट्रायल। कभी भी रद्द करें।",
+    saveLabel:      "{pct}% बचत",
+    perMonth:       "/माह",
+  },
+  or: {
+    pricingTitle:   "ସରଳ, ସଚ୍ଚୋଟ ମୂଲ୍ୟ ନିର୍ଧାରଣ",
+    pricingSubtitle:"ସମସ୍ତ ପ୍ଲାନ ପାଇଁ 7 ଦିନ ମାଗଣା ଟ୍ରାୟଲ। ଯେ କୌଣସି ସମୟରେ ବାତିଲ କରନ୍ତୁ।",
+    trialBadge:     "🎉 7 ଦିନ ମାଗଣା ଟ୍ରାୟଲ — କ୍ରେଡ଼ିଟ କାର୍ଡ ଆବଶ୍ୟକ ନାହିଁ",
+    group1:         "LKG – UKG",
+    group2:         "ଶ୍ରେଣୀ 1 – 5",
+    group3:         "ଶ୍ରେଣୀ 6 – 8",
+    group4:         "ଶ୍ରେଣୀ 9 – 12",
+    basicPlan:      "ବେସିକ",
+    proPlan:        "ପ୍ରୋ",
+    mostPopular:    "⭐ ସବୁଠୁ ଲୋକପ୍ରିୟ",
+    monthly:        "/ ମାସ",
+    quarterly:      "ତ୍ରୈମାସିକ",
+    yearly:         "ବାର୍ଷିକ",
+    save:           "ସଞ୍ଚୟ",
+    billingMonthly: "ମାସିକ",
+    billingQuarterly:"ତ୍ରୈମାସିକ",
+    billingYearly:  "ବାର୍ଷିକ",
+    featuresBasic:  "ଦୈନିକ 30 ମିନିଟ AI ବ୍ୟାଖ୍ୟାନ + 5 ପ୍ରଶ୍ନ କ୍ୱିଜ, ପ୍ରଗତି ଟ୍ରାକିଂ, 11 ଭାଷା, ଅଭିଭାବକ ଡ୍ୟାଶବୋର୍ଡ",
+    featuresPro:    "ବେସିକର ସବୁ + ଶନି-ରବି ସନ୍ଦେହ ସମାଧାନ ସେସନ",
+    choosePlanBtn:  "ମାଗଣା ଟ୍ରାୟଲ ଆରମ୍ଭ କରନ୍ତୁ",
+    icseNote:       "ICSE: ₹{basic} ବେସିକ / ₹{pro} ପ୍ରୋ",
+    footerNote:     "ସମସ୍ତ ମୂଲ୍ୟ GST ଅନ୍ତର୍ଭୁକ୍ତ। 7 ଦିନ ମାଗଣା ଟ୍ରାୟଲ। ଯେ କୌଣସି ସମୟରେ ବାତିଲ।",
+    saveLabel:      "{pct}% ସଞ୍ଚୟ",
+    perMonth:       "/ମାସ",
+  },
+  bn: {
+    pricingTitle:   "সরল, সৎ মূল্য নির্ধারণ",
+    pricingSubtitle:"সব প্ল্যানে ৭ দিনের বিনামূল্যে ট্রায়াল। যেকোনো সময় বাতিল করুন।",
+    trialBadge:     "🎉 ৭ দিন বিনামূল্যে ট্রায়াল — ক্রেডিট কার্ড লাগবে না",
+    group1:         "LKG – UKG",
+    group2:         "ক্লাস ১ – ৫",
+    group3:         "ক্লাস ৬ – ৮",
+    group4:         "ক্লাস ৯ – ১২",
+    basicPlan:      "বেসিক",
+    proPlan:        "প্রো",
+    mostPopular:    "⭐ সবচেয়ে জনপ্রিয়",
+    monthly:        "/ মাস",
+    quarterly:      "ত্রৈমাসিক",
+    yearly:         "বার্ষিক",
+    save:           "সাশ্রয়",
+    billingMonthly: "মাসিক",
+    billingQuarterly:"ত্রৈমাসিক",
+    billingYearly:  "বার্ষিক",
+    featuresBasic:  "দৈনিক ৩০ মিনিট AI বক্তৃতা + ৫ প্রশ্নের কুইজ, অগ্রগতি ট্র্যাকিং, ১১ ভাষা, অভিভাবক ড্যাশবোর্ড",
+    featuresPro:    "বেসিকের সবকিছু + শনি-রবি সন্দেহ সমাধান সেশন",
+    choosePlanBtn:  "বিনামূল্যে ট্রায়াল শুরু করুন",
+    icseNote:       "ICSE: ₹{basic} বেসিক / ₹{pro} প্রো",
+    footerNote:     "সব মূল্যে GST অন্তর্ভুক্ত। ৭ দিনের বিনামূল্যে ট্রায়াল। যেকোনো সময় বাতিল।",
+    saveLabel:      "{pct}% সাশ্রয়",
+    perMonth:       "/মাস",
+  },
+  ta: {
+    pricingTitle:   "எளிய, நேர்மையான விலை நிர்ணயம்",
+    pricingSubtitle:"அனைத்து திட்டங்களிலும் 7 நாள் இலவச சோதனை. எப்போதும் ரத்து செய்யலாம்.",
+    trialBadge:     "🎉 7 நாள் இலவச சோதனை — கிரெடிட் கார்டு தேவையில்லை",
+    group1:         "LKG – UKG",
+    group2:         "வகுப்பு 1 – 5",
+    group3:         "வகுப்பு 6 – 8",
+    group4:         "வகுப்பு 9 – 12",
+    basicPlan:      "அடிப்படை",
+    proPlan:        "புரோ",
+    mostPopular:    "⭐ மிகவும் பிரபலமான",
+    monthly:        "/ மாதம்",
+    quarterly:      "காலாண்டு",
+    yearly:         "ஆண்டு",
+    save:           "சேமிப்பு",
+    billingMonthly: "மாதாந்திர",
+    billingQuarterly:"காலாண்டு",
+    billingYearly:  "ஆண்டு",
+    featuresBasic:  "தினசரி 30 நிமிட AI விரிவுரை + 5 கேள்வி கு்இழ், முன்னேற்ற கண்காணிப்பு, 11 மொழிகள், பெற்றோர் டாஷ்போர்டு",
+    featuresPro:    "அடிப்படையில் உள்ள அனைத்தும் + சனி-ஞாயிறு சந்தேக தீர்வு அமர்வுகள்",
+    choosePlanBtn:  "இலவச சோதனை தொடங்கு",
+    icseNote:       "ICSE: ₹{basic} அடிப்படை / ₹{pro} புரோ",
+    footerNote:     "அனைத்து விலைகளிலும் GST சேர்க்கப்பட்டுள்ளது. 7 நாள் இலவச சோதனை. எப்போதும் ரத்து செய்யலாம்.",
+    saveLabel:      "{pct}% சேமிப்பு",
+    perMonth:       "/மாதம்",
+  },
+  te: {
+    pricingTitle:   "సరళమైన, నిజాయితీగల ధర నిర్ణయం",
+    pricingSubtitle:"అన్ని ప్లాన్‌లలో 7 రోజుల ఉచిత ట్రయల్. ఎప్పుడైనా రద్దు చేయండి.",
+    trialBadge:     "🎉 7 రోజుల ఉచిత ట్రయల్ — క్రెడిట్ కార్డు అవసరం లేదు",
+    group1:         "LKG – UKG",
+    group2:         "తరగతి 1 – 5",
+    group3:         "తరగతి 6 – 8",
+    group4:         "తరగతి 9 – 12",
+    basicPlan:      "బేసిక్",
+    proPlan:        "ప్రో",
+    mostPopular:    "⭐ అత్యంత ప్రజాదరణ పొందిన",
+    monthly:        "/ నెల",
+    quarterly:      "త్రైమాసిక",
+    yearly:         "వార్షిక",
+    save:           "ఆదా",
+    billingMonthly: "నెలవారీ",
+    billingQuarterly:"త్రైమాసిక",
+    billingYearly:  "వార్షిక",
+    featuresBasic:  "రోజువారీ 30 నిమి AI లెక్చర్ + 5 ప్రశ్నల క్విజ్, పురోగతి ట్రాకింగ్, 11 భాషలు, తల్లిదండ్రుల డాష్‌బోర్డ్",
+    featuresPro:    "బేసిక్‌లో ఉన్నవన్నీ + శని-ఆది సందేహ నివృత్తి సెషన్లు",
+    choosePlanBtn:  "ఉచిత ట్రయల్ ప్రారంభించు",
+    icseNote:       "ICSE: ₹{basic} బేసిక్ / ₹{pro} ప్రో",
+    footerNote:     "అన్ని ధరలలో GST చేర్చబడింది. 7 రోజుల ఉచిత ట్రయల్. ఎప్పుడైనా రద్దు చేయండి.",
+    saveLabel:      "{pct}% ఆదా",
+    perMonth:       "/నెల",
+  },
+  mr: {
+    pricingTitle:   "सोपे, प्रामाणिक मूल्य निर्धारण",
+    pricingSubtitle:"सर्व योजनांवर 7 दिवसांची मोफत चाचणी. कधीही रद्द करा.",
+    trialBadge:     "🎉 7 दिवस मोफत — क्रेडिट कार्डची गरज नाही",
+    group1:         "LKG – UKG",
+    group2:         "इयत्ता 1 – 5",
+    group3:         "इयत्ता 6 – 8",
+    group4:         "इयत्ता 9 – 12",
+    basicPlan:      "बेसिक",
+    proPlan:        "प्रो",
+    mostPopular:    "⭐ सर्वात लोकप्रिय",
+    monthly:        "/ महिना",
+    quarterly:      "त्रैमासिक",
+    yearly:         "वार्षिक",
+    save:           "बचत",
+    billingMonthly: "मासिक",
+    billingQuarterly:"त्रैमासिक",
+    billingYearly:  "वार्षिक",
+    featuresBasic:  "दैनिक 30 मिनिट AI व्याख्यान + 5 प्रश्न क्विझ, प्रगती ट्रॅकिंग, 11 भाषा, पालक डॅशबोर्ड",
+    featuresPro:    "बेसिकमधील सर्व + शनि-रवि शंका निवारण सत्र",
+    choosePlanBtn:  "मोफत चाचणी सुरू करा",
+    icseNote:       "ICSE: ₹{basic} बेसिक / ₹{pro} प्रो",
+    footerNote:     "सर्व किंमतींमध्ये GST समाविष्ट आहे. 7 दिवसांची मोफत चाचणी. कधीही रद्द करा.",
+    saveLabel:      "{pct}% बचत",
+    perMonth:       "/महिना",
+  },
+  kn: {
+    pricingTitle:   "ಸರಳ, ಪ್ರಾಮಾಣಿಕ ಬೆಲೆ ನಿರ್ಧಾರ",
+    pricingSubtitle:"ಎಲ್ಲಾ ಯೋಜನೆಗಳಲ್ಲಿ 7 ದಿನಗಳ ಉಚಿತ ಟ್ರಯಲ್. ಯಾವಾಗ ಬೇಕಾದರೂ ರದ್ದು ಮಾಡಿ.",
+    trialBadge:     "🎉 7 ದಿನ ಉಚಿತ — ಕ್ರೆಡಿಟ್ ಕಾರ್ಡ್ ಅಗತ್ಯವಿಲ್ಲ",
+    group1:         "LKG – UKG",
+    group2:         "ತರಗತಿ 1 – 5",
+    group3:         "ತರಗತಿ 6 – 8",
+    group4:         "ತರಗತಿ 9 – 12",
+    basicPlan:      "ಬೇಸಿಕ್",
+    proPlan:        "ಪ್ರೊ",
+    mostPopular:    "⭐ ಅತ್ಯಂತ ಜನಪ್ರಿಯ",
+    monthly:        "/ ತಿಂಗಳು",
+    quarterly:      "ತ್ರೈಮಾಸಿಕ",
+    yearly:         "ವಾರ್ಷಿಕ",
+    save:           "ಉಳಿತಾಯ",
+    billingMonthly: "ಮಾಸಿಕ",
+    billingQuarterly:"ತ್ರೈಮಾಸಿಕ",
+    billingYearly:  "ವಾರ್ಷಿಕ",
+    featuresBasic:  "ದೈನಂದಿನ 30 ನಿಮಿಷ AI ಉಪನ್ಯಾಸ + 5 ಪ್ರಶ್ನೆ ಕ್ವಿಜ್, ಪ್ರಗತಿ ಟ್ರ್ಯಾಕಿಂಗ್, 11 ಭಾಷೆಗಳು, ಪೋಷಕರ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+    featuresPro:    "ಬೇಸಿಕ್‌ನಲ್ಲಿ ಎಲ್ಲವೂ + ಶನಿ-ಭಾನು ಸಂಶಯ ನಿವಾರಣಾ ಸೆಷನ್‌ಗಳು",
+    choosePlanBtn:  "ಉಚಿತ ಟ್ರಯಲ್ ಪ್ರಾರಂಭಿಸಿ",
+    icseNote:       "ICSE: ₹{basic} ಬೇಸಿಕ್ / ₹{pro} ಪ್ರೊ",
+    footerNote:     "ಎಲ್ಲಾ ಬೆಲೆಗಳಲ್ಲಿ GST ಸೇರಿದೆ. 7 ದಿನಗಳ ಉಚಿತ ಟ್ರಯಲ್. ಯಾವಾಗ ಬೇಕಾದರೂ ರದ್ದು ಮಾಡಿ.",
+    saveLabel:      "{pct}% ಉಳಿತಾಯ",
+    perMonth:       "/ತಿಂಗಳು",
+  },
+  gu: {
+    pricingTitle:   "સરળ, પ્રામાણિક કિંમત નિર્ધારણ",
+    pricingSubtitle:"તમામ પ્લાન પર 7 દિવસની મફત ટ્રાયલ. ગમે ત્યારે રદ કરો.",
+    trialBadge:     "🎉 7 દિવસ મફત — ક્રેડિટ કાર્ડ જરૂરી નથી",
+    group1:         "LKG – UKG",
+    group2:         "ધોરણ 1 – 5",
+    group3:         "ધોરણ 6 – 8",
+    group4:         "ધોરણ 9 – 12",
+    basicPlan:      "બેઝિક",
+    proPlan:        "પ્રો",
+    mostPopular:    "⭐ સૌથી લોકપ્રિય",
+    monthly:        "/ મહિને",
+    quarterly:      "ત્રિમાસિક",
+    yearly:         "વાર્ષિક",
+    save:           "બચત",
+    billingMonthly: "માસિક",
+    billingQuarterly:"ત્રિમાસિક",
+    billingYearly:  "વાર્ષિક",
+    featuresBasic:  "દૈનિક 30 મિ AI વ્યાખ્યાન + 5 પ્રશ્ન ક્વિઝ, પ્રગતિ ટ્રેકિંગ, 11 ભાષાઓ, વાલી ડૅશબોર્ડ",
+    featuresPro:    "બેઝિકમાં બધું + શનિ-રવિ શંકા નિવારણ સત્ર",
+    choosePlanBtn:  "મફત ટ્રાયલ શરૂ કરો",
+    icseNote:       "ICSE: ₹{basic} બેઝિક / ₹{pro} પ્રો",
+    footerNote:     "તમામ ભાવોમાં GST સામેલ છે. 7 દિવસની મફત ટ્રાયલ. ગમે ત્યારે રદ કરો.",
+    saveLabel:      "{pct}% બચત",
+    perMonth:       "/મહિને",
+  },
+  ml: {
+    pricingTitle:   "ലളിതമായ, സത്യസന്ധമായ വില നിർണ്ണയം",
+    pricingSubtitle:"എല്ലാ പ്ലാനുകളിലും 7 ദിവസത്തെ സൗജന്യ ട്രയൽ. എപ്പോൾ വേണമെങ്കിലും റദ്ദാക്കാം.",
+    trialBadge:     "🎉 7 ദിവസം സൗജന്യം — ക്രെഡിറ്റ് കാർഡ് ആവശ്യമില്ല",
+    group1:         "LKG – UKG",
+    group2:         "ക്ലാസ് 1 – 5",
+    group3:         "ക്ലാസ് 6 – 8",
+    group4:         "ക്ലാസ് 9 – 12",
+    basicPlan:      "ബേസിക്",
+    proPlan:        "പ്രോ",
+    mostPopular:    "⭐ ഏറ്റവും പ്രചാരമുള്ളത്",
+    monthly:        "/ മാസം",
+    quarterly:      "ത്രൈമാസിക",
+    yearly:         "വാർഷിക",
+    save:           "ലാഭം",
+    billingMonthly: "മാസിക",
+    billingQuarterly:"ത്രൈമാസിക",
+    billingYearly:  "വാർഷിക",
+    featuresBasic:  "ദൈനിക 30 മിനിറ്റ് AI ലക്ചർ + 5 ചോദ്യ ക്വിസ്, പ്രഗതി ട്രാക്കിംഗ്, 11 ഭാഷകൾ, രക്ഷിതാക്കൾ ഡാഷ്‌ബോർഡ്",
+    featuresPro:    "ബേസിക്കിലുള്ളതെല്ലാം + ശനി-ഞായർ സംശയ നിവാരണ സെഷനുകൾ",
+    choosePlanBtn:  "സൗജന്യ ട്രയൽ ആരംഭിക്കുക",
+    icseNote:       "ICSE: ₹{basic} ബേസിക് / ₹{pro} പ്രോ",
+    footerNote:     "എല്ലാ വിലകളിലും GST ഉൾപ്പെടുന്നു. 7 ദിവസത്തെ സൗജന്യ ട്രയൽ. എപ്പോൾ വേണമെങ്കിലും റദ്ദാക്കാം.",
+    saveLabel:      "{pct}% ലാഭം",
+    perMonth:       "/മാസം",
+  },
+  ur: {
+    pricingTitle:   "سادہ، ایماندارانہ قیمت",
+    pricingSubtitle:"تمام پلانز پر 7 دن کا مفت ٹرائل۔ کبھی بھی منسوخ کریں۔",
+    trialBadge:     "🎉 7 دن مفت ٹرائل — کریڈٹ کارڈ ضروری نہیں",
+    group1:         "LKG – UKG",
+    group2:         "کلاس 1 – 5",
+    group3:         "کلاس 6 – 8",
+    group4:         "کلاس 9 – 12",
+    basicPlan:      "بیسک",
+    proPlan:        "پرو",
+    mostPopular:    "⭐ سب سے مقبول",
+    monthly:        "/ ماہ",
+    quarterly:      "سہ ماہی",
+    yearly:         "سالانہ",
+    save:           "بچت",
+    billingMonthly: "ماہانہ",
+    billingQuarterly:"سہ ماہی",
+    billingYearly:  "سالانہ",
+    featuresBasic:  "روزانہ 30 منٹ AI لیکچر + 5 سوالی کوئز، پیشرفت ٹریکنگ، 11 زبانیں، والدین ڈیش بورڈ",
+    featuresPro:    "بیسک میں سب کچھ + ہفتہ و اتوار شک دور کرنے کے سیشن",
+    choosePlanBtn:  "مفت ٹرائل شروع کریں",
+    icseNote:       "ICSE: ₹{basic} بیسک / ₹{pro} پرو",
+    footerNote:     "تمام قیمتوں میں GST شامل ہے۔ 7 دن کا مفت ٹرائل۔ کبھی بھی منسوخ کریں۔",
+    saveLabel:      "{pct}% بچت",
+    perMonth:       "/ماہ",
+  },
+};
+
+// ─── Groups config ────────────────────────────────────────────────────────────
+const groups = [
+  { id: "group1", labelKey: "group1", basicPrice: 149, proPrice: 249,  icseBasic: null,  isePro: null  },
+  { id: "group2", labelKey: "group2", basicPrice: 199, proPrice: 349,  icseBasic: null,  icsePro: null },
+  { id: "group3", labelKey: "group3", basicPrice: 249, proPrice: 449,  icseBasic: null,  icsePro: null },
+  { id: "group4", labelKey: "group4", basicPrice: 299, proPrice: 549,  icseBasic: 349,   icsePro: 649  },
+];
+
+// ─── Billing config ───────────────────────────────────────────────────────────
+const billing = {
+  monthly:   { months: 1,  discount: 0    },
+  quarterly: { months: 3,  discount: 0.10 },
+  yearly:    { months: 12, discount: 0.25 },
+};
+
+// ─── State ────────────────────────────────────────────────────────────────────
+let currentLang    = 'en';
+let currentBilling = 'monthly';
+
+// ─── Price calculator ─────────────────────────────────────────────────────────
+function calcPrice(base, period) {
+  const { months, discount } = billing[period];
+  return Math.round(base * months * (1 - discount));
+}
+
+// ─── Billing toggle ───────────────────────────────────────────────────────────
+function setBilling(period) {
+  currentBilling = period;
+  updateBillingButtons();
+  renderCards(currentLang);
+}
+
+function updateBillingButtons() {
+  const t = translations[currentLang];
+  ['monthly','quarterly','yearly'].forEach(p => {
+    const btn = document.getElementById('btn-' + p);
+    btn.textContent = t['billing' + p.charAt(0).toUpperCase() + p.slice(1)];
+    if (p === currentBilling) {
+      btn.className = 'billing-btn px-5 py-2 rounded-xl text-sm font-bold bg-gray-900 text-white shadow transition-all';
+    } else {
+      btn.className = 'billing-btn px-5 py-2 rounded-xl text-sm font-bold text-gray-500 hover:text-gray-700 transition-all';
+    }
+    // Add savings badge
+    if (billing[p].discount > 0 && p !== 'monthly') {
+      const pct = Math.round(billing[p].discount * 100);
+      if (p === currentBilling) {
+        btn.innerHTML = t['billing' + p.charAt(0).toUpperCase() + p.slice(1)] +
+          ` <span class="ml-1 text-xs bg-green-400 text-green-900 px-1.5 py-0.5 rounded-full">${t.saveLabel.replace('{pct}', pct)}</span>`;
+      } else {
+        btn.innerHTML = t['billing' + p.charAt(0).toUpperCase() + p.slice(1)] +
+          ` <span class="ml-1 text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full">${t.saveLabel.replace('{pct}', pct)}</span>`;
+      }
+    }
+  });
+}
+
+// ─── Render cards ─────────────────────────────────────────────────────────────
+function renderCards(lang) {
+  const t = translations[lang];
+  const isRTL = (lang === 'ur');
+  const container = document.getElementById('pricingCards');
+  container.innerHTML = '';
+
+  groups.forEach((group, idx) => {
+    const basicTotal = calcPrice(group.basicPrice, currentBilling);
+    const proTotal   = calcPrice(group.proPrice,   currentBilling);
+    const perMonthBasic = currentBilling === 'monthly' ? group.basicPrice : Math.round(basicTotal / billing[currentBilling].months);
+    const perMonthPro   = currentBilling === 'monthly' ? group.proPrice   : Math.round(proTotal   / billing[currentBilling].months);
+
+    const showICSE  = (group.icseBasic !== null);
+    const icseNote  = showICSE
+      ? `<p class="text-xs text-gray-400 mt-2">${t.icseNote.replace('{basic}', group.icseBasic).replace('{pro}', group.icsePro)}</p>`
+      : '';
+
+    const billingLabel = currentBilling !== 'monthly'
+      ? `<span class="text-xs font-semibold text-green-600 ml-1">(₹${perMonthPro}${t.perMonth})</span>`
+      : '';
+
+    const isHighlighted = idx === 2; // Group 3 (Class 6-8) highlighted by default
+
+    const card = `
+      <div class="card-hover bg-white rounded-3xl border-2 ${isHighlighted ? 'border-green-500 shadow-2xl' : 'border-gray-100 shadow-lg'} overflow-hidden flex flex-col" dir="${isRTL ? 'rtl' : 'ltr'}">
+
+        ${isHighlighted ? `<div class="bg-green-500 text-white text-center text-xs font-black py-2 tracking-wider uppercase">✨ ${t.mostPopular}</div>` : '<div class="py-5"></div>'}
+
+        <div class="px-7 pb-8 flex flex-col flex-1">
+          <!-- Class label -->
+          <div class="text-center mb-6">
+            <span class="inline-block bg-gradient-to-r from-green-100 to-blue-100 text-gray-700 px-5 py-1.5 rounded-full text-sm font-bold">
+              ${t[group.labelKey]}
+            </span>
+          </div>
+
+          <!-- Basic plan -->
+          <div class="mb-4 p-4 rounded-2xl bg-gray-50 border border-gray-200">
+            <div class="flex justify-between items-center mb-1">
+              <span class="font-bold text-gray-700 text-base">${t.basicPlan}</span>
+              <span class="text-xs text-gray-400 font-medium">${t.billingMonthly !== t['billing' + currentBilling.charAt(0).toUpperCase() + currentBilling.slice(1)] ? `₹${basicTotal} total` : ''}</span>
+            </div>
+            <div class="flex items-baseline gap-1">
+              <span class="text-4xl font-black text-gray-800">₹${perMonthBasic}</span>
+              <span class="text-gray-400 text-sm font-medium">${t.perMonth}</span>
+            </div>
+          </div>
+
+          <!-- Pro plan (highlighted) -->
+          <div class="mb-5 p-5 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 text-white relative shadow-lg">
+            <div class="flex justify-between items-center mb-1">
+              <span class="font-black text-lg">${t.proPlan}</span>
+              <span class="text-xs text-green-200 font-medium">${currentBilling !== 'monthly' ? `₹${proTotal} total` : ''}</span>
+            </div>
+            <div class="flex items-baseline gap-1">
+              <span class="text-5xl font-black">₹${perMonthPro}</span>
+              <span class="text-green-200 text-sm font-medium">${t.perMonth}</span>
+            </div>
+            ${currentBilling !== 'monthly' ? `
+            <div class="mt-2 text-xs text-green-100 font-semibold">
+              ${t.saveLabel.replace('{pct}', Math.round(billing[currentBilling].discount * 100))} vs monthly
+            </div>` : ''}
+          </div>
+
+          ${icseNote}
+
+          <!-- Features -->
+          <div class="space-y-3 mb-6 flex-1">
+            <div class="flex items-start gap-2.5 text-sm text-gray-600">
+              <span class="text-green-500 mt-0.5 shrink-0 font-bold">✓</span>
+              <span>${t.featuresBasic}</span>
+            </div>
+            <div class="flex items-start gap-2.5 text-sm text-gray-600">
+              <span class="text-green-500 mt-0.5 shrink-0 font-bold">✓</span>
+              <span>${t.featuresPro}</span>
+            </div>
+          </div>
+
+          <!-- Buttons -->
+          <div class="space-y-2.5 mt-auto">
+            <button onclick="selectPlan('${group.id}', 'basic', ${perMonthBasic})"
+              class="w-full py-3.5 rounded-2xl font-bold text-sm bg-gray-100 hover:bg-gray-200 text-gray-800 transition-all">
+              ${t.choosePlanBtn} — ${t.basicPlan}
+            </button>
+            <button onclick="selectPlan('${group.id}', 'pro', ${perMonthPro})"
+              class="w-full py-3.5 rounded-2xl font-black text-sm bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white transition-all shadow-md">
+              ${t.choosePlanBtn} — ${t.proPlan}
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+    container.innerHTML += card;
+  });
+}
+
+// ─── Language change ──────────────────────────────────────────────────────────
+document.getElementById('languageSelector').addEventListener('change', function() {
+  currentLang = this.value;
+  const t = translations[currentLang];
+  const isRTL = (currentLang === 'ur');
+
+  document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
+  document.getElementById('pricingTitle').textContent    = t.pricingTitle;
+  document.getElementById('pricingSubtitle').textContent = t.pricingSubtitle;
+  document.getElementById('trialBadge').textContent      = t.trialBadge;
+  document.getElementById('footerNote').textContent      = t.footerNote;
+
+  updateBillingButtons();
+  renderCards(currentLang);
+});
+
+// ─── Plan selection (wire up your Razorpay here) ──────────────────────────────
+function selectPlan(groupId, planType, pricePerMonth) {
+  // TODO: Replace with actual Razorpay integration
+  // Example:
+  // const options = {
+  //   key: 'rzp_test_Scp3O4HsUrj6Ft',
+  //   amount: pricePerMonth * 100,
+  //   currency: 'INR',
+  //   name: 'AITuition',
+  //   description: `${planType.toUpperCase()} Plan - ${groupId}`,
+  //   handler: function(response) { verifyPayment(response); }
+  // };
+  // new Razorpay(options).open();
+
+  const t = translations[currentLang];
+  alert(`${t.choosePlanBtn}\n\nPlan: ${planType.toUpperCase()}\nGroup: ${groupId}\nPrice: ₹${pricePerMonth}${t.perMonth}\nBilling: ${currentBilling}`);
+}
+
+// ─── Initial render ───────────────────────────────────────────────────────────
+(function init() {
+  const t = translations[currentLang];
+  document.getElementById('pricingTitle').textContent    = t.pricingTitle;
+  document.getElementById('pricingSubtitle').textContent = t.pricingSubtitle;
+  document.getElementById('trialBadge').textContent      = t.trialBadge;
+  document.getElementById('footerNote').textContent      = t.footerNote;
+  updateBillingButtons();
+  renderCards(currentLang);
+})();
+</script>
+</body>
+</html>
