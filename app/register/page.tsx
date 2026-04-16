@@ -4,10 +4,23 @@ import { useState, FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { BookOpen, Eye, EyeOff, Check } from 'lucide-react';
-import { useI18n } from '@/lib/i18n';
+
+// Simple translation function (Phase 2: integrate full i18n)
+const t = (key: string) => {
+  const translations: Record<string, string> = {
+    'auth.register': 'Create Your Account',
+    'auth.name': 'Full Name',
+    'auth.email': 'Email Address',
+    'auth.password': 'Password',
+    'auth.password.hint': 'At least 8 characters',
+    'auth.register.button': 'Create Account',
+    'auth.login.link': 'Already have an account? Log in',
+    'common.error': 'Something went wrong. Please try again.',
+  };
+  return translations[key] || key;
+};
 
 export default function RegisterPage() {
-  const { t } = useI18n();
   const router = useRouter();
 
   const [name, setName] = useState('');

@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { Nunito } from 'next/font/google';
 import './globals.css';
-import { I18nProvider } from '@/lib/i18n';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { getSession } from '@/lib/auth';
@@ -37,13 +36,11 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${nunito.variable} font-sans antialiased bg-white text-gray-900 flex flex-col min-h-screen`}>
-        <I18nProvider>
-          <Navbar isLoggedIn={!!session} />
-          <main className="flex-1 pt-16">
-            {children}
-          </main>
-          <Footer />
-        </I18nProvider>
+        <Navbar isLoggedIn={!!session} />
+        <main className="flex-1 pt-16">
+          {children}
+        </main>
+        <Footer />
       </body>
     </html>
   );

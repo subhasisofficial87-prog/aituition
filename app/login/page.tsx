@@ -4,10 +4,21 @@ import { useState, FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { BookOpen, Eye, EyeOff } from 'lucide-react';
-import { useI18n } from '@/lib/i18n';
+
+// Simple translation function (Phase 2: integrate full i18n)
+const t = (key: string) => {
+  const translations: Record<string, string> = {
+    'auth.login': 'Sign In',
+    'auth.email': 'Email Address',
+    'auth.password': 'Password',
+    'auth.login.button': 'Sign In',
+    'auth.register.link': "Don't have an account? Sign up",
+    'common.error': 'Invalid email or password',
+  };
+  return translations[key] || key;
+};
 
 export default function LoginPage() {
-  const { t } = useI18n();
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect') ?? '/dashboard';
