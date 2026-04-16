@@ -35,9 +35,9 @@ if sys.platform == 'win32':
 
 # ─── Config ───────────────────────────────────────────────────────────────────
 FTP_HOST     = 'ftp.aituition.in'   # or use the IP from Hostinger panel
-FTP_USER     = 'YOUR_FTP_USER'
-FTP_PASS     = 'YOUR_FTP_PASSWORD'
-FTP_ROOT     = '/home/YOUR_USERNAME/domains/aituition.in/nodejs'
+FTP_USER     = 'u803669722.aituition.in'
+FTP_PASS     = 'Sub@i2rXFSze!HxR[E0467551'
+FTP_ROOT     = '/home/u803669722/domains/aituition.in/nodejs'
 SITE_URL     = 'https://aituition.in'
 
 LOCAL_ROOT   = Path(__file__).parent
@@ -46,18 +46,21 @@ STATIC_DIR   = LOCAL_ROOT / '.next' / 'static'
 PUBLIC_DIR   = LOCAL_ROOT / 'public'
 SERVER_JS    = LOCAL_ROOT / 'server.js'
 
-ENV_CONTENT  = """\
-MYSQL_HOST=127.0.0.1
-MYSQL_PORT=3306
-MYSQL_USER=YOUR_DB_USER
-MYSQL_PASSWORD="YOUR_DB_PASSWORD"
-MYSQL_DATABASE=YOUR_DB_NAME
-JWT_SECRET=YOUR_JWT_SECRET_MIN_32_CHARS
-ANTHROPIC_API_KEY=YOUR_ANTHROPIC_API_KEY
-RAZORPAY_KEY_ID=YOUR_RAZORPAY_KEY_ID
-RAZORPAY_KEY_SECRET=YOUR_RAZORPAY_KEY_SECRET
-NEXT_PUBLIC_RAZORPAY_KEY_ID=YOUR_RAZORPAY_KEY_ID
-NEXT_PUBLIC_BASE_URL=https://aituition.in
+# Load environment variables from .env.local
+from dotenv import load_dotenv
+load_dotenv(LOCAL_ROOT / '.env.local')
+
+# Build ENV_CONTENT from environment variables for deployment
+ENV_CONTENT = f"""\
+NEXT_PUBLIC_SUPABASE_URL={os.getenv('NEXT_PUBLIC_SUPABASE_URL', 'https://your-project.supabase.co')}
+NEXT_PUBLIC_SUPABASE_ANON_KEY={os.getenv('NEXT_PUBLIC_SUPABASE_ANON_KEY', 'your_anon_key_here')}
+SUPABASE_SERVICE_KEY={os.getenv('SUPABASE_SERVICE_KEY', 'your_service_role_key_here')}
+JWT_SECRET={os.getenv('JWT_SECRET', 'your_jwt_secret_here')}
+ANTHROPIC_API_KEY={os.getenv('ANTHROPIC_API_KEY', 'your_anthropic_key_here')}
+RAZORPAY_KEY_ID={os.getenv('RAZORPAY_KEY_ID', 'your_razorpay_key_here')}
+RAZORPAY_KEY_SECRET={os.getenv('RAZORPAY_KEY_SECRET', 'your_razorpay_secret_here')}
+NEXT_PUBLIC_RAZORPAY_KEY_ID={os.getenv('NEXT_PUBLIC_RAZORPAY_KEY_ID', 'your_public_razorpay_key_here')}
+NEXT_PUBLIC_BASE_URL={os.getenv('NEXT_PUBLIC_BASE_URL', 'https://aituition.in')}
 NODE_ENV=production
 """
 

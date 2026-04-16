@@ -1,12 +1,6 @@
 /**
  * server.js — Passenger/LiteSpeed entry point for aituition.in
- *
- * KEY BEHAVIOURS:
- * 1. Self-heals .env.local before Next.js starts (file can vanish on Hostinger)
- * 2. Loads env via dotenv BEFORE requiring Next.js modules
- * 3. Starts Next.js standalone HTTP server on process.env.PORT (Passenger sets this)
- *
- * NEVER kill the lsnode.js process — restart via: touch tmp/restart.txt
+ * Now using Supabase instead of local MySQL
  */
 
 const fs   = require('fs');
@@ -14,17 +8,17 @@ const path = require('path');
 
 // ─── Self-Heal .env.local ─────────────────────────────────────────────────────
 const ENV_PATH    = path.join(__dirname, '.env.local');
+// Placeholder: secrets should be provided via deploy.py or environment
+// This self-heal is a fallback only - actual secrets come from FTP deployment
 const ENV_CONTENT = [
-  'MYSQL_HOST=127.0.0.1',
-  'MYSQL_PORT=3306',
-  'MYSQL_USER=YOUR_DB_USER',
-  'MYSQL_PASSWORD="YOUR_DB_PASSWORD"',
-  'MYSQL_DATABASE=YOUR_DB_NAME',
-  'JWT_SECRET=YOUR_JWT_SECRET_MIN_32_CHARS',
-  'ANTHROPIC_API_KEY=YOUR_ANTHROPIC_API_KEY',
-  'RAZORPAY_KEY_ID=YOUR_RAZORPAY_KEY_ID',
-  'RAZORPAY_KEY_SECRET=YOUR_RAZORPAY_KEY_SECRET',
-  'NEXT_PUBLIC_RAZORPAY_KEY_ID=YOUR_RAZORPAY_KEY_ID',
+  'NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co',
+  'NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here',
+  'SUPABASE_SERVICE_KEY=your_service_role_key_here',
+  'JWT_SECRET=aituition2024SecureJwtKey32CharMin!!HKL',
+  'ANTHROPIC_API_KEY=your_anthropic_key_here',
+  'RAZORPAY_KEY_ID=your_razorpay_key_here',
+  'RAZORPAY_KEY_SECRET=your_razorpay_secret_here',
+  'NEXT_PUBLIC_RAZORPAY_KEY_ID=your_public_razorpay_key_here',
   'NEXT_PUBLIC_BASE_URL=https://aituition.in',
   'NODE_ENV=production',
 ].join('\n') + '\n';

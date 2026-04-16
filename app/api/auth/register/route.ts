@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import { query, queryOne } from '@/lib/db';
+import { supabase } from '@/lib/supabase';
 import { signToken, setAuthCookie } from '@/lib/auth';
-import type { User } from '@/types';
 
 export async function POST(req: NextRequest) {
   try {
     const { name, email, password } = await req.json();
 
+    // Validation
     if (!name || !email || !password) {
       return NextResponse.json({ error: 'All fields required' }, { status: 400 });
     }
@@ -15,32 +15,77 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'auth.error.weak' }, { status: 400 });
     }
 
-    // Check duplicate
-    const existing = await queryOne<User>(
-      'SELECT id FROM users WHERE email = ?',
-      [email.toLowerCase()]
-    );
+    // Check if email exists
+    const { data: existing, error: checkError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', email.toLowerCase())
+      .single();
+
+    if (checkError && checkError.code !== 'PGRST116') {
+      // PGRST116 means no rows found, which is expected
+      console.error('[register] Check error:', checkError);
+      return NextResponse.json({ error: 'common.error', message: checkError.message }, { status: 500 });
+    }
+
     if (existing) {
       return NextResponse.json({ error: 'auth.error.exists' }, { status: 409 });
     }
 
+    // Hash password
     const hash = await bcrypt.hash(password, 12);
-    const result = await query(
-      'INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)',
-      [name.trim(), email.toLowerCase(), hash]
-    );
 
-    const userId: number = (result as any).insertId;
+    // Insert user
+    const { data: user, error: insertError } = await supabase
+      .from('users')
+      .insert([{
+        name: name.trim(),
+        email: email.toLowerCase(),
+        password_hash: hash,
+      }])
+      .select()
+      .single();
+
+    if (insertError || !user) {
+      console.error('[register] Insert error:', insertError);
+      return NextResponse.json({ error: 'common.error', message: insertError?.message }, { status: 500 });
+    }
 
     // Create user_progress row
-    await query('INSERT INTO user_progress (user_id) VALUES (?)', [userId]);
+    const { error: progressError } = await supabase
+      .from('user_progress')
+      .insert([{ user_id: user.id }]);
 
-    const token = await signToken({ userId, email: email.toLowerCase(), name: name.trim(), tier: 'free' });
-    const res = NextResponse.json({ ok: true }, { status: 201 });
+    if (progressError) {
+      console.error('[register] Progress error:', progressError);
+      return NextResponse.json({ error: 'common.error', message: progressError.message }, { status: 500 });
+    }
+
+    // Sign JWT token
+    const token = await signToken({
+      userId: user.id,
+      email: email.toLowerCase(),
+      name: name.trim(),
+      tier: 'free',
+    });
+
+    const res = NextResponse.json({
+      ok: true,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        subscription_tier: user.subscription_tier,
+        created_at: user.created_at,
+      },
+    }, { status: 201 });
     setAuthCookie(res, token);
     return res;
-  } catch (err) {
-    console.error('[register]', err);
-    return NextResponse.json({ error: 'common.error' }, { status: 500 });
+  } catch (err: any) {
+    console.error('[register] Error:', err);
+    return NextResponse.json({
+      error: 'common.error',
+      message: err?.message,
+    }, { status: 500 });
   }
 }

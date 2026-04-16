@@ -1,8 +1,32 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { withRetry } from './db';
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
 const MODEL = 'claude-opus-4-5';
+
+// ─── Retry Logic for Anthropic API ────────────────────────────────────────────
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  maxAttempts = 3,
+  baseDelayMs = 1000,
+): Promise<T> {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await fn();
+    } catch (err: unknown) {
+      const e = err as { status?: number; message?: string; code?: string };
+      // 529 = API overloaded; other errors may include timeout or connection issues
+      const isRetryable = e.status === 529 || ['ETIMEDOUT', 'ECONNRESET'].includes(e.code ?? '');
+      const isLastAttempt = attempt === maxAttempts;
+
+      if (!isRetryable || isLastAttempt) throw err;
+
+      // Exponential backoff: 1s, 2s, 4s
+      const delayMs = baseDelayMs * Math.pow(2, attempt - 1);
+      await new Promise(r => setTimeout(r, delayMs));
+    }
+  }
+  throw new Error('withRetry: max attempts exhausted');
+}
 
 // ─── System Prompt Builder ────────────────────────────────────────────────────
 export function buildSystemPrompt(
